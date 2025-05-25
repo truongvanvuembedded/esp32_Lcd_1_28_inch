@@ -80,14 +80,30 @@ static const char *TAG = "main.c";
 //	Remarks:		-
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void app_main(void)
+void UI_task(void)
 {
-	GC9A01_Init();	// Init LCD driver
-	CS816D_Init();	// Init touch driver
 	UI_Init();		// Init UI
 	while (1)
 	{
 		UI_Job();
-		vTaskDelay(1);
+		vTaskDelay(10);
+	}
+}
+void app_main(void)
+{
+	GC9A01_Init();	// Init LCD driver
+	CS816D_Init();	// Init touch driver
+	xTaskCreatePinnedToCore(
+		UI_task,         // Task function
+		"UI_Job_Task",  // Name of the task
+		8192,           // Stack size in words
+		NULL,           // Task input parameter
+		5,              // Priority of the task
+		NULL,           // Task handle
+		0               // Core where the task should run
+	);
+	while (1)
+	{
+		vTaskDelay(pdMS_TO_TICKS(1000));  // Delay to prevent watchdog
 	}
 }

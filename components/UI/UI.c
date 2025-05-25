@@ -56,7 +56,7 @@
 extern DMA_ATTR uint16_t u2_ScreenBuff[U4_DISPLAY_HEIGHT * U4_DISPLAY_WIDTH];
 static lv_display_t *pst_DisplayDriver = NULL;
 U1 Drawn_Buffer_1[U4_DISPLAY_HEIGHT * U4_DISPLAY_WIDTH *2/10];
-U1 Drawn_Buffer_2[U4_DISPLAY_HEIGHT * U4_DISPLAY_WIDTH *2/10];
+// U1 Drawn_Buffer_2[U4_DISPLAY_HEIGHT * U4_DISPLAY_WIDTH *2/10];
 //==================================================================================================
 //	Local ROM
 //==================================================================================================
@@ -92,7 +92,7 @@ void UI_Init(void)
 	lv_display_set_flush_cb(pst_DisplayDriver, display_Flush_Callback);				// Set flush callback for display driver
 
 	// Set buffer for display driver
-	lv_display_set_buffers(pst_DisplayDriver, Drawn_Buffer_1, Drawn_Buffer_2, sizeof(Drawn_Buffer_1), LV_DISPLAY_RENDER_MODE_PARTIAL);	
+	lv_display_set_buffers(pst_DisplayDriver, Drawn_Buffer_1, NULL, sizeof(Drawn_Buffer_1), LV_DISPLAY_RENDER_MODE_PARTIAL);	
 	lvgl_tick_init();			// Initialize LVGL tick timer
 	create_ui();				// Create basic UI (button)
 	create_InputDev();			// Create Input devices
@@ -220,11 +220,11 @@ static void create_ui(void)
 	//lv_obj_center(label);
 
 	//lv_example_get_started_1();	// Create a simple "Hello World" label
-	lv_example_get_started_2();	// Create a button with a label and react on click event
+	// lv_example_get_started_2();	// Create a button with a label and react on click event
 	//lv_example_get_started_3();	// Create styles from scratch for buttons
 	//lv_example_get_started_4();	// Create a slider and write its value on a label
 
-	// lv_demo_benchmark();	// Create a demo benchmark screen
+	lv_demo_benchmark();	// Create a demo benchmark screen
 
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
