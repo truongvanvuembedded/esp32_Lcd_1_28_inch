@@ -53,7 +53,6 @@
 //==================================================================================================
 //	Local RAM 
 //==================================================================================================
-extern DMA_ATTR uint16_t u2_ScreenBuff[U4_DISPLAY_HEIGHT * U4_DISPLAY_WIDTH];
 static lv_display_t *pst_DisplayDriver = NULL;
 U1 Drawn_Buffer_1[U4_DISPLAY_HEIGHT * U4_DISPLAY_WIDTH *2/10];
 // U1 Drawn_Buffer_2[U4_DISPLAY_HEIGHT * U4_DISPLAY_WIDTH *2/10];
@@ -74,7 +73,7 @@ static void create_InputDev(void);
 //==================================================================================================
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Tag:			UI�z
+//	Tag:			UI_Init
 //	Name:			UI_Init
 //	Function:		Initialize LVGL, display driver, and LCD buffer
 //
@@ -99,7 +98,7 @@ void UI_Init(void)
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Tag:			�yUI�z
+//	Tag:			�ｿｽyUI�ｿｽz
 //	Name:			UI_Job
 //	Function:		Handle UI tasks (should be called in main loop)
 //
@@ -117,7 +116,7 @@ void UI_Job(void)
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Tag:			�yUI�z
+//	Tag:			lvgl_tick_init
 //	Name:			lvgl_tick_init
 //	Function:		Initialize periodic timer for LVGL tick
 //
@@ -146,7 +145,7 @@ static void lvgl_tick_init(void)
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Tag:			�yUI�z
+//	Tag:			lv_tick_task
 //	Name:			lv_tick_task
 //	Function:		Increase LVGL tick every 1ms
 //
@@ -164,7 +163,7 @@ static void lv_tick_task(void *arg)
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Tag:			�yUI�z
+//	Tag:			display_Flush_Callback
 //	Name:			display_Flush_Callback
 //	Function:		Send display area data from LVGL to LCD
 //
@@ -184,18 +183,24 @@ static void display_Flush_Callback(lv_display_t *disp, const lv_area_t *area, ui
 	U4 au4_y1 = area->y1;
 	U4 au4_x2 = area->x2;
 	U4 au4_y2 = area->y2;
-	U4 au4_size;
+	U4 au4_size = (au4_x2 - au4_x1 + 1) * (au4_y2 - au4_y1 + 1);
 
-	GC9A01_SetWindow(au4_x1, au4_y1, au4_x2, au4_y2);									// Set drawing window on LCD
-	au4_size = (au4_x2 - au4_x1 + 1) * (au4_y2 - au4_y1 + 1) * sizeof(uint16_t);		// Calculate size of area to send
-	lcd_data((uint8_t *)color_p, au4_size);												// Send color data to LCD
-	lv_disp_flush_ready(disp);															// Notify LVGL that flushing is done
+	// Swap bytes in color_p buffer (assuming color_p is uint16_t array)
+	uint16_t *buf = (uint16_t *)color_p;
+	for (U4 i = 0; i < au4_size; i++) {
+		uint16_t px = buf[i];
+		buf[i] = (px >> 8) | (px << 8);
+	}
+
+	GC9A01_SetWindow(au4_x1, au4_y1, au4_x2, au4_y2); // Set drawing window on LCD
+	lcd_data((uint8_t *)color_p, au4_size * sizeof(uint16_t)); // Send color data to LCD
+	lv_disp_flush_ready(disp); // Notify LVGL that flushing is done
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Tag:			�yUI�z
+//	Tag:			
 //	Name:			create_ui
-//	Function:		Create basic user interface (button)
+//	Function:		Create user interface
 //
 //	Argument:		-
 //	Return value:	-
@@ -204,10 +209,6 @@ static void display_Flush_Callback(lv_display_t *disp, const lv_area_t *area, ui
 //	Remarks:		 Create a button at the center of the screen
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void button_event_cb(lv_event_t * e)
-{
-
-}
 static void create_ui(void)
 {
 	//lv_obj_t * button = lv_button_create(lv_screen_active());
@@ -224,14 +225,15 @@ static void create_ui(void)
 	//lv_example_get_started_3();	// Create styles from scratch for buttons
 	//lv_example_get_started_4();	// Create a slider and write its value on a label
 
-	lv_demo_benchmark();	// Create a demo benchmark screen
+	//lv_demo_benchmark();	// Create a demo benchmark screen
+	lv_demo_keypad_encoder();	// Create a demo for keypad and encoder input
 
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Tag:			�yUI�z
-//	Name:			create_InputDev
-//	Function:		Create input devices
+//	Tag:			my_input_read
+//	Name:			my_input_read
+//	Function:		Read touch input from CS816D and update LVGL input data
 //
 //	Argument:		-
 //	Return value:	-
