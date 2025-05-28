@@ -54,8 +54,8 @@
 //	Local RAM 
 //==================================================================================================
 static lv_display_t *pst_DisplayDriver = NULL;
+static lv_obj_t * list1;
 U1 Drawn_Buffer_1[U4_DISPLAY_HEIGHT * U4_DISPLAY_WIDTH *2/10];
-// U1 Drawn_Buffer_2[U4_DISPLAY_HEIGHT * U4_DISPLAY_WIDTH *2/10];
 //==================================================================================================
 //	Local ROM
 //==================================================================================================
@@ -98,7 +98,7 @@ void UI_Init(void)
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Tag:			ï¿½ï½¿ï½½yUIï¿½ï½¿ï½½z
+//	Tag:			?¿½?½¿?½½yUI?¿½?½¿?½½z
 //	Name:			UI_Job
 //	Function:		Handle UI tasks (should be called in main loop)
 //
@@ -209,6 +209,62 @@ static void display_Flush_Callback(lv_display_t *disp, const lv_area_t *area, ui
 //	Remarks:		 Create a button at the center of the screen
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+void SwitchEventCallback(lv_event_t * e)
+{
+	// Handle switch toggle event
+	lv_obj_t * sw = lv_event_get_target(e); // Get the switch object
+	if(lv_obj_has_state(sw, LV_STATE_CHECKED)) {
+		ESP_LOGI(TAG, "WiFi is ON");
+	} else {
+		ESP_LOGI(TAG, "WiFi is OFF");
+	}
+}
+// Helper function to add a WiFi item to the list
+static void add_wifi_item(lv_obj_t* parent, const char* ssid) {
+	lv_obj_t* wifi_btn = lv_button_create(parent);
+	lv_obj_set_size(wifi_btn, LV_PCT(85), LV_SIZE_CONTENT);
+	lv_obj_set_flex_flow(wifi_btn, LV_FLEX_FLOW_ROW);
+	lv_obj_set_flex_align(wifi_btn, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+	lv_obj_t* label = lv_label_create(wifi_btn);
+	lv_label_set_text(label, ssid);
+
+	lv_obj_t* icon = lv_label_create(wifi_btn);
+	lv_label_set_text(icon, LV_SYMBOL_WIFI);
+}
+
+static void WifiList_UI(void)
+{
+	lv_obj_t* screen = lv_screen_active();
+	lv_obj_set_flex_flow(screen, LV_FLEX_FLOW_COLUMN);
+
+	lv_obj_t* wifi_head = lv_obj_create(screen);
+	lv_obj_set_flex_flow(wifi_head, LV_FLEX_FLOW_ROW);
+	lv_obj_set_flex_align(wifi_head, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+	lv_obj_set_height(wifi_head,  LV_PCT(20));
+	lv_obj_set_width(wifi_head, LV_PCT(100));
+
+	lv_obj_t * wifi_icon = lv_label_create(wifi_head);
+	lv_label_set_text(wifi_icon, LV_SYMBOL_WIFI);
+	lv_obj_t* wifiLable = lv_label_create(wifi_head);
+	lv_label_set_text(wifiLable, "WIFI");
+
+	lv_obj_t* WifiSwitch = lv_switch_create(wifi_head);
+	lv_obj_add_event_cb(WifiSwitch, SwitchEventCallback, LV_EVENT_VALUE_CHANGED, NULL);
+
+	lv_obj_t* wifiList = lv_list_create(screen);
+	lv_obj_set_flex_flow(wifiList, LV_FLEX_FLOW_COLUMN);
+	lv_obj_set_flex_align(wifiList, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+	lv_obj_set_height(wifiList,  LV_PCT(80));
+	lv_obj_set_width(wifiList, LV_PCT(100));
+	lv_obj_t* btn = lv_list_add_btn(wifiList, LV_SYMBOL_WIFI, "Wifi Network 1");
+	lv_obj_set_size(btn, LV_PCT(85), LV_SIZE_CONTENT);
+}
+void event_handler(lv_event_t * e)
+{
+	ESP_LOGI(TAG, "event_handler");
+}
+
 static void create_ui(void)
 {
 	//lv_obj_t * button = lv_button_create(lv_screen_active());
@@ -226,8 +282,26 @@ static void create_ui(void)
 	//lv_example_get_started_4();	// Create a slider and write its value on a label
 
 	//lv_demo_benchmark();	// Create a demo benchmark screen
-	lv_demo_keypad_encoder();	// Create a demo for keypad and encoder input
+	//lv_demo_keypad_encoder();	// Create a demo for keypad and encoder input
+	//WifiList_UI();	// Create a WiFi list UI
+    /*Create a list*/
+    list1 = lv_list_create(lv_screen_active());
+    lv_obj_set_size(list1, 180, 220);
+    lv_obj_center(list1);
 
+    /*Add buttons to the list*/
+    lv_obj_t * btn;
+    lv_list_add_text(list1, "File");
+    btn = lv_list_add_button(list1, LV_SYMBOL_FILE, "New");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_button(list1, LV_SYMBOL_DIRECTORY, "Open");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_button(list1, LV_SYMBOL_SAVE, "Save");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_button(list1, LV_SYMBOL_CLOSE, "Delete");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
+    btn = lv_list_add_button(list1, LV_SYMBOL_EDIT, "Edit");
+    lv_obj_add_event_cb(btn, event_handler, LV_EVENT_CLICKED, NULL);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
