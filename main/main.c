@@ -81,17 +81,28 @@
 //	Remarks:		-
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void app_main(void)
+void UI_task(void *pvParameters)
 {
-	GC9A01_Init();    // Init LCD driver
-	CS816D_Init();    // Init touch driver
-	Wifi_Scan();      // Init WiFi scan
-	//xTaskCreatePinnedToCore(UI_task, "UI_Job_Task", 4096, NULL, 5, NULL, 0);
 	UI_Init();		// Init UI
 	while (1)
 	{
 		UI_Job();
 		vTaskDelay(10);
 	}
+}
+void Wifi_task(void *pvParameters)
+{
+	Init_WifiScan();      // Init WiFi scan
+	while (1)
+	{
+		WifiScan_Job(); // Perform WiFi scan job
+		vTaskDelay(10);
+	}
+}
+void app_main(void)
+{
+	GC9A01_Init();    // Init LCD driver
+	CS816D_Init();    // Init touch driver
+	xTaskCreatePinnedToCore(Wifi_task, "Wifi_task", 4096, NULL, 3, NULL, 0);
+	xTaskCreatePinnedToCore(UI_task, "UI_Job_Task", 8192, NULL, 5, NULL, 0);
 }
