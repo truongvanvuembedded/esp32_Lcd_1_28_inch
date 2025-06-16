@@ -118,7 +118,6 @@ static void wifi_connect_status_cb(lv_timer_t * timer1)
 void Event_ConfirmPasswordButton(lv_event_t * e)
 {
 	const char *password = lv_textarea_get_text(ui_WifiTypingArea);
-	ESP_LOGI("PW", "Password pointer: %p, Password string: %s, Length: %d", password, password ? password : "(null)", password ? lv_strlen(password) : -1);
 	if (password == NULL || lv_strlen(password) < 8) 
 	{
 		st_WifiSelected.u1_WifiPasswordValid_F = U1FALSE; // Set password valid flag to FALSE

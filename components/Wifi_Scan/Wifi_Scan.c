@@ -173,10 +173,10 @@ static void Wifi_Scan_Start(void)
 	esp_wifi_scan_start(NULL, true);
 
 	u2_WifiNum = SCAN_LIST_SIZE;
-	ESP_LOGI(TAG, "Max AP number ap_info can hold = %u", SCAN_LIST_SIZE);
+	//ESP_LOGI(TAG, "Max AP number ap_info can hold = %u", SCAN_LIST_SIZE);
 	ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
 	ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&u2_WifiNum, ap_info));
-	ESP_LOGI(TAG, "Total APs scanned = %u, actual AP number ap_info holds = %u", ap_count, u2_WifiNum);
+	//ESP_LOGI(TAG, "Total APs scanned = %u, actual AP number ap_info holds = %u", ap_count, u2_WifiNum);
 	for (U1 au1_ForC = 0; au1_ForC < u2_WifiNum; au1_ForC++) {
 		memcpy(st_WifiInfo[au1_ForC].u1_ssid, ap_info[au1_ForC].ssid, sizeof(ap_info[au1_ForC].ssid));
 		st_WifiInfo[au1_ForC].u1_rssi = ap_info[au1_ForC].rssi;
@@ -226,49 +226,15 @@ static void Wifi_Connect(void)
 	{
 		if (u1_WifiConnected_F == U1TRUE)
 		{
-			return; // Exit if already connecting
+			return;
 		}
-		
-		wifi_config_t wifi_config = {0}; // đảm bảo không có dữ liệu rác
+		wifi_config_t wifi_config = {0};
 
 		strcpy((char *)wifi_config.sta.ssid, (const char *)st_WifiSelected.u1_ssid);
 		strcpy((char *)wifi_config.sta.password, (const char *)st_WifiSelected.u1_password);
 		wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
-
-		ESP_LOGI(TAG, "Connecting to WiFi SSID: %s", wifi_config.sta.ssid);
-		ESP_LOGI(TAG, "Connecting to WiFi Password: %s", wifi_config.sta.password);
-
 		ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 		ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
-		/**
-		 * @brief Khởi động WiFi, đảm bảo WiFi đã được start.
-		 *
-		 * @return
-		 *    - ESP_OK: Th�?nh công
-		 *    - ESP_ERR_WIFI_NOT_INIT: WiFi chưa được khởi tạo bởi esp_wifi_init
-		 *    - ESP_ERR_INVALID_ARG: Thường không xảy ra, h�?m nội b�? được gọi với tham s�? không hợp l�?, người dùng nên kiểm tra cấu hình liên quan đến WiFi
-		 *    - ESP_ERR_NO_MEM: Thiếu b�? nh�?
-		 *    - ESP_ERR_WIFI_CONN: Lỗi nội b�? WiFi, khối điều khiển station hoặc soft-AP sai
-		 *    - ESP_FAIL: Các lỗi nội b�? WiFi khác
-		 */
-		esp_err_t wifi_start_ret = esp_wifi_start();       // đảm bảo WiFi đã start
-		ESP_LOGI(TAG, "esp_wifi_start() return: %d", wifi_start_ret);
-		esp_err_t ret = esp_wifi_connect();
-		if (ret == ESP_OK) {
-			ESP_LOGI(TAG, "esp_wifi_connect: ESP_OK (succeed)");
-		} else if (ret == ESP_ERR_WIFI_NOT_INIT) {
-			ESP_LOGE(TAG, "esp_wifi_connect: ESP_ERR_WIFI_NOT_INIT (WiFi is not initialized by esp_wifi_init)");
-		} else if (ret == ESP_ERR_WIFI_NOT_STARTED) {
-			ESP_LOGE(TAG, "esp_wifi_connect: ESP_ERR_WIFI_NOT_STARTED (WiFi is not started by esp_wifi_start)");
-		} else if (ret == ESP_ERR_WIFI_MODE) {
-			ESP_LOGE(TAG, "esp_wifi_connect: ESP_ERR_WIFI_MODE (WiFi mode error)");
-		} else if (ret == ESP_ERR_WIFI_CONN) {
-			ESP_LOGE(TAG, "esp_wifi_connect: ESP_ERR_WIFI_CONN (WiFi internal error, station or soft-AP control block wrong)");
-		} else if (ret == ESP_ERR_WIFI_SSID) {
-			ESP_LOGE(TAG, "esp_wifi_connect: ESP_ERR_WIFI_SSID (SSID of AP which station connects is invalid)");
-		} else {
-			ESP_LOGE(TAG, "esp_wifi_connect: Unknown error (code: %d)", ret);
-		}
 		esp_wifi_connect();
 
 		st_WifiSelected.u1_WifiPasswordValid_F = U1FALSE; // Reset lại flag
@@ -276,8 +242,8 @@ static void Wifi_Connect(void)
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Name	:	Wifi_DisConnect
-//	Function:	Disconnect to the selected WiFi network
+//	Name	:	event_handler
+//	Function:	Event handler for WiFi and IP events
 //	
 //	Argument:	-
 //	Return	:	-
@@ -286,11 +252,6 @@ static void Wifi_Connect(void)
 //	Remarks	:	-
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-static void Wifi_DisConnect(void)
-{
-	ESP_ERROR_CHECK(esp_wifi_disconnect());
-}
-
 static void event_handler(void* arg, esp_event_base_t event_base,
 								int32_t event_id, void* event_data)
 {
