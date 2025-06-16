@@ -35,7 +35,7 @@
 //==================================================================================================
 //	Local define
 //==================================================================================================
-#define U1_ESP_MAXIMUM_RETRY_CONNECT ((U1)5)	// Maximum number of connection retries
+#define U1_ESP_MAXIMUM_RETRY_CONNECT ((U1)3)	// Maximum number of connection retries
 //==================================================================================================
 //	Local define I/O
 //==================================================================================================
@@ -82,6 +82,7 @@ void Init_WifiScan(void)
 	u2_WifiNum = U2MIN;
 	u1_ConnectRetry_num = U1MIN;
 	u1_WifiConnected_F = U1FALSE; // Initialize WiFi connected flag to FALSE
+	u1_WifiConnected_Fail_F = U1FALSE;
 	// Initialize WiFi scan state
 	u1_WifiScanState = WIFI_SCAN_OFF;			// Initialize WiFi scan state to OFF
 	u1_WifiScanState_Last = WIFI_SCAN_OFF;	// Initialize last WiFi scan state to OFF
@@ -202,6 +203,7 @@ static void Wifi_Scan_Stop(void)
 {
 	u1_WifiScanDone_F = U1FALSE; // Reset WiFi scan done flag
 	u2_WifiNum = U1MIN; // Reset WiFi number
+	memset(st_WifiInfo, 0, sizeof(st_WifiInfo));
 	u1_WifiConnected_F = U1FALSE; // Reset WiFi connected flag
 	ESP_ERROR_CHECK(esp_wifi_stop());
 	ESP_LOGI(TAG, "WiFi scan stopped and cleaned up.");
@@ -242,12 +244,12 @@ static void Wifi_Connect(void)
 		 * @brief Khởi động WiFi, đảm bảo WiFi đã được start.
 		 *
 		 * @return
-		 *    - ESP_OK: Thành công
+		 *    - ESP_OK: Th�?nh công
 		 *    - ESP_ERR_WIFI_NOT_INIT: WiFi chưa được khởi tạo bởi esp_wifi_init
-		 *    - ESP_ERR_INVALID_ARG: Thường không xảy ra, hàm nội bộ được gọi với tham số không hợp lệ, người dùng nên kiểm tra cấu hình liên quan đến WiFi
-		 *    - ESP_ERR_NO_MEM: Thiếu bộ nhớ
-		 *    - ESP_ERR_WIFI_CONN: Lỗi nội bộ WiFi, khối điều khiển station hoặc soft-AP sai
-		 *    - ESP_FAIL: Các lỗi nội bộ WiFi khác
+		 *    - ESP_ERR_INVALID_ARG: Thường không xảy ra, h�?m nội b�? được gọi với tham s�? không hợp l�?, người dùng nên kiểm tra cấu hình liên quan đến WiFi
+		 *    - ESP_ERR_NO_MEM: Thiếu b�? nh�?
+		 *    - ESP_ERR_WIFI_CONN: Lỗi nội b�? WiFi, khối điều khiển station hoặc soft-AP sai
+		 *    - ESP_FAIL: Các lỗi nội b�? WiFi khác
 		 */
 		esp_err_t wifi_start_ret = esp_wifi_start();       // đảm bảo WiFi đã start
 		ESP_LOGI(TAG, "esp_wifi_start() return: %d", wifi_start_ret);
@@ -296,6 +298,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 		// esp_wifi_connect();
 	} else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
 		u1_WifiConnected_F = U1FALSE; // Reset WiFi connected flag
+		u1_WifiConnected_Fail_F = U1FALSE;
 		if (u1_ConnectRetry_num < U1_ESP_MAXIMUM_RETRY_CONNECT) {
 			esp_wifi_connect();
 			u1_ConnectRetry_num++;
@@ -303,9 +306,11 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 		}
 		else {
 			ESP_LOGI(TAG, "connect to the AP fail");
+			u1_WifiConnected_Fail_F = U1TRUE;
 			u1_ConnectRetry_num = 0; // Reset retry count
 		}
 	} else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+		u1_WifiConnected_Fail_F = U1FALSE;
 		u1_WifiConnected_F = U1TRUE; // Set WiFi connected flag
 		ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
 		ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));

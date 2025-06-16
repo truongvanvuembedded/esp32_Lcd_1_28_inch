@@ -34,7 +34,7 @@
 
 #include "CS816D.h"
 #include "GC9A01.h"
-#include "UI.h"
+#include "Display.h"
 #include "Define.h"
 #ifndef REAL_RAM
 #define REAL_RAM

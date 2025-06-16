@@ -39,8 +39,7 @@ EXTERN U1 u1_WifiScanState;			// State of WiFi scan (off, on process, on complet
 EXTERN U1 u1_WifiScanState_Last;	// State of WiFi scan last(off, on process, on complete)
 EXTERN U1 u1_WifiScanDone_F;		// Flag to indicate if WiFi scan is done
 EXTERN U1 u1_WifiConnected_F;		// Flag to indicate if WiFi is connected
+EXTERN U1 u1_WifiConnected_Fail_F;
 // UI.c
-EXTERN U1 u1_UIWifiScanState;		// State of UI WiFi scan (off, on process, on complete)
-EXTERN U1 u1_UIWifiScanState_Last;	// State of UI WiFi scan last(off, on process, on complete)
 EXTERN ST_WIFI_SELECTED st_WifiSelected;	// Struct to hold selected WiFi information
 /* ************************************* End of File ******************************************** */
