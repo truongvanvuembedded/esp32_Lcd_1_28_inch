@@ -9,15 +9,23 @@
 
 lv_timer_t *timer;
 lv_timer_t *timer1;
-
+/**
+ * @brief Callback function for WiFi scan state timer.
+ *
+ * This function is called periodically by a timer to check the current WiFi scan state.
+ * It updates the UI spinner visibility and populates the WiFi list container with scan results
+ * when scanning is done. If scanning is stopped, it clears the WiFi list container except for the spinner.
+ *
+ * @param timer Pointer to the lv_timer_t structure (can be NULL).
+ */
 static void Check_ScanState_Callback(lv_timer_t * timer)
 {
 	if (u1_WifiScanState == U1ON)
 	{
-		if (u1_WifiScanDone_F == U1OFF){
-			lv_obj_clear_flag(ui_Spinner1, LV_OBJ_FLAG_HIDDEN);     /// Flags
-		}else{
-			lv_obj_add_flag(ui_Spinner1, LV_OBJ_FLAG_HIDDEN);     /// Flags
+		if (u1_WifiScanDone_F == U1OFF) {
+			lv_obj_clear_flag(ui_Spinner1, LV_OBJ_FLAG_HIDDEN);
+		} else {
+			lv_obj_add_flag(ui_Spinner1, LV_OBJ_FLAG_HIDDEN);
 			if (timer) {
 				lv_timer_del(timer);
 				timer = NULL;
@@ -31,15 +39,15 @@ static void Check_ScanState_Callback(lv_timer_t * timer)
 				} else {
 					lv_label_set_text(ui_comp_get_child(item, UI_COMP_WIFIITEMS_LABEL3), "");
 				}
-				}
 			}
+		}
 	}
-	else{
+	else {
 		if (timer) {
 			lv_timer_del(timer);
 			timer = NULL;
 		}
-		lv_obj_add_flag(ui_Spinner1, LV_OBJ_FLAG_HIDDEN);     /// Flags
+		lv_obj_add_flag(ui_Spinner1, LV_OBJ_FLAG_HIDDEN);
 		uint32_t child_cnt = lv_obj_get_child_cnt(ui_WifiListContainer);
 		for (uint32_t i = 0; i < child_cnt; ) {
 			lv_obj_t *child = lv_obj_get_child(ui_WifiListContainer, i);
@@ -47,35 +55,47 @@ static void Check_ScanState_Callback(lv_timer_t * timer)
 				lv_obj_del(child);
 				child_cnt--;
 			} else {
-				i++; // B? qua spinner
+				i++;
 			}
 		}
 	}
-	
 }
+
+/**
+ * @brief Event handler for the WiFi scan switch.
+ *
+ * This function is triggered when the user toggles the WiFi scan switch.
+ * It updates the scan state variable and starts the scan state timer.
+ *
+ * @param e Pointer to the lv_event_t structure.
+ */
 
 void Event_ScanSwitch(lv_event_t * e)
 {
-	// Just set a flag, do not handle list here
-	lv_obj_t * sw = lv_event_get_target(e); // Get the switch object
+	lv_obj_t * sw = lv_event_get_target(e);
 	if(lv_obj_has_state(sw, LV_STATE_CHECKED)) {
-		u1_WifiScanState = WIFI_SCAN_ON; // Set WiFi scan state to ON
+		u1_WifiScanState = WIFI_SCAN_ON;
 	} else {
-		u1_WifiScanState = WIFI_SCAN_OFF; // Set WiFi scan state to OFF
+		u1_WifiScanState = WIFI_SCAN_OFF;
 	}
-	// Start a one-shot timer to handle scan completion
 	timer = lv_timer_create(Check_ScanState_Callback, 100, NULL);
 }
 
-
-// Create a timer to check connection status and update UI
+/**
+ * @brief Callback function for WiFi connection status timer.
+ *
+ * This function is called periodically by a timer to checks the WiFi connection status and updates the message box UI accordingly.
+ * It removes spinner and label children from the message box, then displays a success or error message.
+ * The timer is deleted after the status is handled.
+ *
+ * @param timer1 Pointer to the lv_timer_t structure.
+ */
 static void wifi_connect_status_cb(lv_timer_t * timer1)
 {
 	lv_obj_t * mbox = (lv_obj_t *)lv_timer_get_user_data(timer1);
 
-	if ((u1_WifiConnected_F == U1TRUE) || (u1_WifiConnected_Fail_F == U1TRUE)) 
+	if ((u1_WifiConnected_F == U1TRUE) || (u1_WifiConnected_Fail_F == U1TRUE))
 	{
-		// Remove all labels and spinners in the message box
 		uint32_t child_cnt = lv_obj_get_child_cnt(mbox);
 		for (uint32_t i = 0; i < child_cnt; ) {
 			lv_obj_t *child = lv_obj_get_child(mbox, i);
@@ -92,61 +112,65 @@ static void wifi_connect_status_cb(lv_timer_t * timer1)
 
 		for (uint32_t i = 0; i < child_cnt;) {
 			lv_obj_t * child = lv_obj_get_child(content, i);
-
 			if (lv_obj_check_type(child, &lv_label_class)) {
 				lv_obj_del(child);
-				// Kh?ng t?ng i v? s? l??ng child ?? gi?m
 				child_cnt--;
 			} else {
-				i++;  // Kh?ng x?a => t?ng ch? s?
+				i++;
 			}
 		}
 
-		if ((u1_WifiConnected_F == U1TRUE))
-		{
+		if (u1_WifiConnected_F == U1TRUE) {
 			lv_msgbox_add_title(mbox, "Success");
 			lv_msgbox_add_text(mbox, "\nConnect Successfully!");
-		} else if (u1_WifiConnected_Fail_F == U1TRUE)
-		{
+		} else if (u1_WifiConnected_Fail_F == U1TRUE) {
 			lv_msgbox_add_title(mbox, "Error");
-			lv_msgbox_add_text(mbox, "\nWrong PassWord!");
+			lv_msgbox_add_text(mbox, "\nWrong Password!");
 		}
 		lv_timer_del(timer1);
 	}
 }
 
+/**
+ * @brief Event handler for the confirm password button.
+ *
+ * This function is called when the user presses the confirm password button.
+ * It validates the entered password length and shows a warning if invalid.
+ * If valid, it copies the password, shows a connecting message box with a spinner,
+ * and starts a timer to check the WiFi connection status.
+ *
+ * @param e Pointer to the lv_event_t structure.
+ */
 void Event_ConfirmPasswordButton(lv_event_t * e)
 {
 	const char *password = lv_textarea_get_text(ui_WifiTypingArea);
-	if (password == NULL || lv_strlen(password) < 8) 
+	if (password == NULL || lv_strlen(password) < 8)
 	{
-		st_WifiSelected.u1_WifiPasswordValid_F = U1FALSE; // Set password valid flag to FALSE
+		st_WifiSelected.u1_WifiPasswordValid_F = U1FALSE;
 		lv_obj_t * mbox1 = lv_msgbox_create(lv_screen_active());
-		lv_obj_clear_flag(mbox1, LV_OBJ_FLAG_SCROLLABLE); // Clear scrollable flag
-		lv_obj_set_width(mbox1, LV_PCT(80)); // Set width to 80% of parent
-		lv_obj_set_height(mbox1, LV_PCT(50)); // Set height to 30% of parent
+		lv_obj_clear_flag(mbox1, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_set_width(mbox1, LV_PCT(80));
+		lv_obj_set_height(mbox1, LV_PCT(50));
 		lv_msgbox_add_title(mbox1, "Warning");
 		lv_msgbox_add_text(mbox1, "Password must be at least 8 characters long.");
 		lv_msgbox_add_close_button(mbox1);
 	}
-	else 
+	else
 	{
 		lv_strcpy((char*)st_WifiSelected.u1_password, password);
-		st_WifiSelected.u1_WifiPasswordValid_F = U1TRUE; // Set password valid flag to TRUE
+		st_WifiSelected.u1_WifiPasswordValid_F = U1TRUE;
 		lv_obj_t * mbox1 = lv_msgbox_create(NULL);
-		lv_obj_set_width(mbox1, LV_PCT(80)); // Set width to 80% of parent
-		lv_obj_set_height(mbox1, LV_PCT(50)); // Set height to 30% of parent
+		lv_obj_set_width(mbox1, LV_PCT(80));
+		lv_obj_set_height(mbox1, LV_PCT(50));
 		lv_msgbox_add_title(mbox1, "Connecting to WiFi");
 
-		// Show spinner and "Connecting..." text initially
 		lv_obj_t * spinner = lv_spinner_create(mbox1);
-		lv_obj_set_size(spinner, 40, 40); // Set spinner size as needed
-		lv_obj_align(spinner, LV_ALIGN_CENTER, 0, 0); // Center the spinner in the message box
-		lv_spinner_set_anim_params(spinner, 1000, 60); // Set animation time and arc length
+		lv_obj_set_size(spinner, 40, 40);
+		lv_obj_align(spinner, LV_ALIGN_CENTER, 0, 0);
+		lv_spinner_set_anim_params(spinner, 1000, 60);
 		lv_msgbox_add_text(mbox1, "\nConnecting...");
 
-		// create callback to handle WiFi connection
-		timer1 = lv_timer_create(wifi_connect_status_cb, 200, mbox1); // Check every 200ms
+		timer1 = lv_timer_create(wifi_connect_status_cb, 200, mbox1);
 		lv_msgbox_add_close_button(mbox1);
 	}
 }
