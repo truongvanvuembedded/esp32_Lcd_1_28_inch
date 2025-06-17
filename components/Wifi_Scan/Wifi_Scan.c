@@ -62,7 +62,6 @@ static const char *TAG = "Wifi_Scan";
 static void Wifi_Scan_Start(void);
 static void Wifi_Scan_Stop(void);
 static void Wifi_Connect(void);
-static void Wifi_DisConnect(void);
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -173,13 +172,12 @@ static void Wifi_Scan_Start(void)
 	esp_wifi_scan_start(NULL, true);
 
 	u2_WifiNum = SCAN_LIST_SIZE;
-	//ESP_LOGI(TAG, "Max AP number ap_info can hold = %u", SCAN_LIST_SIZE);
 	ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
 	ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&u2_WifiNum, ap_info));
 	//ESP_LOGI(TAG, "Total APs scanned = %u, actual AP number ap_info holds = %u", ap_count, u2_WifiNum);
 	for (U1 au1_ForC = 0; au1_ForC < u2_WifiNum; au1_ForC++) {
 		memcpy(st_WifiInfo[au1_ForC].u1_ssid, ap_info[au1_ForC].ssid, sizeof(ap_info[au1_ForC].ssid));
-		st_WifiInfo[au1_ForC].u1_rssi = ap_info[au1_ForC].rssi;
+		st_WifiInfo[au1_ForC].s1_rssi = ap_info[au1_ForC].rssi;
 		memcpy(st_WifiInfo[au1_ForC].u1_bssid, ap_info[au1_ForC].bssid, sizeof(ap_info[au1_ForC].bssid));
 		st_WifiInfo[au1_ForC].u1_channel = ap_info[au1_ForC].primary;
 		st_WifiInfo[au1_ForC].u1_authmode = ap_info[au1_ForC].authmode;

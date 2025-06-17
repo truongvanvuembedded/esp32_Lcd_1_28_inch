@@ -9,6 +9,7 @@ idf_component_register(
         "UI/screens/ui_MenuScreen.c"
         "UI/screens/ui_WifiTyping.c"
         "UI/screens/ui_WifiScreen.c"
+        "UI/screens/ui_WeatherScreen.c"
     INCLUDE_DIRS 
         "UI"
         "UI/components"

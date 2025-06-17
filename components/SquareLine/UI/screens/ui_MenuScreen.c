@@ -22,6 +22,15 @@ void ui_event_Settingbutton(lv_event_t * e)
     }
 }
 
+void ui_event_DisplayButton(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_screen_change(&ui_WeatherScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_WeatherScreen_screen_init);
+    }
+}
+
 // build funtions
 
 void ui_MenuScreen_screen_init(void)
@@ -70,6 +79,7 @@ void ui_MenuScreen_screen_init(void)
     lv_obj_center(label1);
 
     lv_obj_add_event_cb(ui_Settingbutton, ui_event_Settingbutton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_DisplayButton, ui_event_DisplayButton, LV_EVENT_ALL, NULL);
     uic_ButtonMenuContainer = ui_ButtonMenuContainer;
     uic_Settingbutton = ui_Settingbutton;
     uic_DisplayButton = ui_DisplayButton;

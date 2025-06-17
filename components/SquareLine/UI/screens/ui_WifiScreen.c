@@ -15,6 +15,15 @@ lv_obj_t * ui_ScanSwitch = NULL;
 lv_obj_t * ui_WifiListContainer = NULL;
 lv_obj_t * ui_Spinner1 = NULL;
 // event funtions
+void ui_event_WifiScreen(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_LEFT) {
+        lv_indev_wait_release(lv_indev_active());
+        _ui_screen_change(&ui_MenuScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_MenuScreen_screen_init);
+    }
+}
 void ui_event_ScanSwitch(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -90,6 +99,7 @@ void ui_WifiScreen_screen_init(void)
     lv_obj_remove_flag(ui_Spinner1, LV_OBJ_FLAG_CLICKABLE);      /// Flags
 
     lv_obj_add_event_cb(ui_ScanSwitch, ui_event_ScanSwitch, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_WifiScreen, ui_event_WifiScreen, LV_EVENT_ALL, NULL);
     uic_WifiScreen = ui_WifiScreen;
     uic_WifiHeaderContainer = ui_WifiHeaderContainer;
     uic_WifiListContainer = ui_WifiListContainer;

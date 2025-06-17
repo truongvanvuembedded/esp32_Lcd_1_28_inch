@@ -17,6 +17,7 @@ extern lv_obj_t * ui_MenuScreen;
 extern lv_obj_t * ui_ButtonMenuContainer;
 extern void ui_event_Settingbutton(lv_event_t * e);
 extern lv_obj_t * ui_Settingbutton;
+extern void ui_event_DisplayButton(lv_event_t * e);
 extern lv_obj_t * ui_DisplayButton;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_ButtonMenuContainer;

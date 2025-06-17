@@ -25,6 +25,7 @@
 #include "Define.h"
 #include "CS816D.h"
 #include "DataDef.h"
+#include "lvgl.h"
 //==================================================================================================
 //	RAM area (global variable definition/declaration)
 //==================================================================================================
@@ -42,4 +43,22 @@ EXTERN U1 u1_WifiConnected_F;		// Flag to indicate if WiFi is connected
 EXTERN U1 u1_WifiConnected_Fail_F;
 // UI.c
 EXTERN ST_WIFI_SELECTED st_WifiSelected;	// Struct to hold selected WiFi information
+EXTERN lv_subject_t subj_day;
+EXTERN lv_subject_t subj_month;
+EXTERN lv_subject_t subj_weekday;
+EXTERN lv_subject_t subj_hour;
+EXTERN lv_subject_t subj_minute;
+EXTERN lv_subject_t subj_Second;
+EXTERN lv_subject_t subj_lat;
+EXTERN lv_subject_t subj_lon;
+EXTERN lv_subject_t subj_temperature;
+EXTERN lv_subject_t subj_humidity;
+// HTTP_Client.c
+EXTERN U1 u1_BufferRespone[MAX_HTTP_OUTPUT_BUFFER + 1];
+EXTERN U1 u1_HttpRequest;
+
+EXTERN ST_WEATHER_DATA st_WeatherData;
+EXTERN ST_DATETIME_DATA st_DateTimeData;
+EXTERN ST_DATETIME_DATA st_DateTimeData_Before;
+
 /* ************************************* End of File ******************************************** */

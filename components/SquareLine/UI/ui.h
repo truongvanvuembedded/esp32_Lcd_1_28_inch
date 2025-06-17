@@ -23,6 +23,7 @@ extern "C" {
 #include "screens/ui_MenuScreen.h"
 #include "screens/ui_WifiScreen.h"
 #include "screens/ui_WifiTyping.h"
+#include "screens/ui_WeatherScreen.h"
 
 ///////////////////// VARIABLES ////////////////////
 
