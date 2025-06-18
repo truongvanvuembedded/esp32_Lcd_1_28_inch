@@ -5,6 +5,8 @@
 
 #include "../ui.h"
 #include "esp_log.h"
+#include "Wifi_Scan.h"
+
 lv_obj_t * uic_WifiListContainer;
 lv_obj_t * uic_WifiHeaderContainer;
 lv_obj_t * uic_WifiScreen;
@@ -14,6 +16,8 @@ lv_obj_t * ui_Label1 = NULL;
 lv_obj_t * ui_ScanSwitch = NULL;
 lv_obj_t * ui_WifiListContainer = NULL;
 lv_obj_t * ui_Spinner1 = NULL;
+lv_timer_t *timer_;
+
 // event funtions
 void ui_event_WifiScreen(lv_event_t * e)
 {
@@ -40,6 +44,31 @@ void ui_event_WifiSelected(lv_event_t* e)
         lv_obj_t* target = lv_event_get_target(e);
         lv_memset(st_WifiSelected.u1_ssid, 0, sizeof(st_WifiSelected.u1_ssid));
         lv_strcpy((char*) st_WifiSelected.u1_ssid, lv_label_get_text(ui_comp_get_child(target, UI_COMP_WIFIITEMS_LABEL3)));
+        U4 u4_ssidLen = sizeof(st_WifiSelected.u1_ssid);
+        U4 u4_passLen = sizeof(st_WifiSelected.u1_password);
+        // Check SSID exist in NVS or Not
+        if (u1_load_wifi_info((char*) st_WifiSelected.u1_ssid, (size_t *) &u4_ssidLen, (char*) st_WifiSelected.u1_password, (size_t *) &u4_passLen))
+        {
+            //ESP_LOGI("NVS", "login %s, ssidLen: %d, password: %s, passLen: %d", 
+            //    st_WifiSelected.u1_ssid, u4_ssidLen, st_WifiSelected.u1_password, u4_passLen);
+            lv_obj_t * mbox1 = lv_msgbox_create(NULL);
+            lv_obj_set_width(mbox1, LV_PCT(80));
+            lv_obj_set_height(mbox1, LV_PCT(50));
+            lv_msgbox_add_title(mbox1, "Connecting to WiFi");
+
+            lv_obj_t * spinner = lv_spinner_create(mbox1);
+            lv_obj_set_size(spinner, 40, 40);
+            lv_obj_align(spinner, LV_ALIGN_CENTER, 0, 0);
+            lv_spinner_set_anim_params(spinner, 1000, 60);
+            lv_msgbox_add_text(mbox1, "\nConnecting...");
+
+            timer_ = lv_timer_create(wifi_connect_status_cb, 200, mbox1);
+		    st_WifiSelected.u1_WifiPasswordValid_F = U1TRUE;
+            lv_msgbox_add_close_button(mbox1);
+            return;
+        }
+        
+
         lv_label_set_text(ui_WifiSelectedName, (const char*)st_WifiSelected.u1_ssid);
         //ESP_LOGI("Wifi Select", "%s", st_WifiSelected.u1_ssid);
         _ui_screen_change(&ui_WifiTyping, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_WifiTyping_screen_init);

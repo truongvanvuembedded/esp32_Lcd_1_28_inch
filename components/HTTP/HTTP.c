@@ -39,8 +39,6 @@
 #define MAX_HTTP_RECV_BUFFER 	512
 #define MAX_HTTP_OUTPUT_BUFFER 	2048
 #define OPEN_WEATHER_API_KEY	"b84c92063426d24ade911c7c7a771248"
-#define LAT_LOCATION_DATA		21.0285
-#define LON_LOCATION_DATA		105.8542
 //==================================================================================================
 //	Local define I/O
 //==================================================================================================
@@ -57,13 +55,14 @@ static esp_http_client_handle_t client;
 //	Local ROM
 //==================================================================================================
 static const char *TAG = "HTTP_CLIENT";
+static const double LatData = 21.0285;
+static const double LonData = 105.8542;
 //==================================================================================================
 //	Local Function Prototype
 //==================================================================================================
 static esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 static void wait_for_time_sync();
 static void ParseWeatherData(U1* apu1_WeatherData);
-static void get_and_log_Time(void);
 //==================================================================================================
 //	Source Code
 //==================================================================================================
@@ -83,6 +82,7 @@ static void get_and_log_Time(void);
 void http_init(void)
 {
 	u1_HttpRequest = U1ON;
+	u1_SynTimeRequest = U1ON;
 	st_WeatherData.Temperature = 0;
 	st_WeatherData.Humidity = 0;
 	st_WeatherData.u1_GetWeatherDataSuccess_F = U1FALSE;
@@ -95,14 +95,14 @@ void http_init(void)
 	st_DateTimeData.u1_Month = 0;
 	st_DateTimeData.u1_SynTimeDataSuccess_F = U1FALSE;
 
-	st_LocationData.lat = (double) LAT_LOCATION_DATA;
-	st_LocationData.lon = (double) LON_LOCATION_DATA;
+	st_LocationData.lat = (double) LatData;
+	st_LocationData.lon = (double) LonData;
 
 	// Build query string dynamically using defined macros
 	char query_string[128];
 	snprintf(query_string, sizeof(query_string),
 		"lat=%.5f&lon=%.5f&appid=%s",
-		LAT_LOCATION_DATA, LON_LOCATION_DATA, OPEN_WEATHER_API_KEY);
+		LatData, LonData, OPEN_WEATHER_API_KEY);
 	memset(u1_BufferRespone, 0, sizeof(u1_BufferRespone));
 	// Init http client and server end point to get weather data
 	esp_http_client_config_t config = {
@@ -280,19 +280,19 @@ void http_rest_with_url(void)
 	// GET
 	esp_err_t err = esp_http_client_perform(client);
 	if (err == ESP_OK) {
-		st_WeatherData.u1_GetWeatherDataSuccess_F = U1TRUE;
 		ParseWeatherData(u1_BufferRespone);
 		ESP_LOGI(TAG, "Weather Data: %s", u1_BufferRespone);
 		memset(u1_BufferRespone, 0, sizeof(u1_BufferRespone));
+		st_WeatherData.u1_GetWeatherDataSuccess_F = U1TRUE;
+		esp_http_client_close(client);
 	} else {
+		st_WeatherData.u1_GetWeatherDataSuccess_F = U1FALSE;
 		ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
 	}
-	// Init Simple network for get date time data
-	get_and_log_Time();
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	Name	:	get_and_log_Time
+//	Name	:	sync_time_with_ntp
 //	Function:	Get current time, update system time data, and log it
 //	
 //	Argument:	-
@@ -302,7 +302,7 @@ void http_rest_with_url(void)
 //	Remarks	:	Gets and logs the current time, updates st_DateTimeData.
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-static void get_and_log_Time(void)
+void sync_time_with_ntp(void)
 {
 	esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
 	esp_sntp_setservername(0, "pool.ntp.org");

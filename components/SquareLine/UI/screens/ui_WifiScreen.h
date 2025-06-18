@@ -17,6 +17,7 @@ extern lv_obj_t * ui_WifiScreen;
 extern lv_obj_t * ui_WifiHeaderContainer;
 extern lv_obj_t * ui_Label1;
 extern void ui_event_ScanSwitch(lv_event_t * e);
+extern void wifi_connect_status_cb(lv_timer_t * a_timer);
 extern lv_obj_t * ui_ScanSwitch;
 extern lv_obj_t * ui_WifiListContainer;
 extern lv_obj_t * ui_Spinner1;

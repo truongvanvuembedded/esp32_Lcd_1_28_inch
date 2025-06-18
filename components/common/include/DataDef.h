@@ -50,6 +50,13 @@ typedef struct
 	U1 u1_password[64];	// Pointer to the WiFi password
 	U1 u1_WifiPasswordValid_F;	// Flag to indicate if the WiFi password is valid
 } ST_WIFI_SELECTED;
+typedef struct {
+	U1 u1_WifiScanState;         // State of WiFi scan (off, on process, on complete)
+	U1 u1_WifiScanState_Last;    // State of WiFi scan last (off, on process, on complete)
+	U1 u1_WifiScanDone_F;        // Flag to indicate if WiFi scan is done
+	U1 u1_WifiConnected_F;       // Flag to indicate if WiFi is connected
+	U1 u1_WifiConnected_Fail_F;  // Flag to indicate if WiFi connection failed
+} ST_WIFI_STATUS;
 
 // Struct to hold weather data
 typedef struct {

@@ -15,4 +15,4 @@ idf_component_register(
         "UI/components"
         "UI/fonts"
         "UI/screens"
-    REQUIRES lvgl common)
+    REQUIRES lvgl common Wifi_Scan)

@@ -20,11 +20,11 @@ lv_timer_t *timer1;
  */
 static void Check_ScanState_Callback(lv_timer_t * timer)
 {
-	if (u1_WifiScanState == U1ON)
+	if (st_WifiStatus.u1_WifiScanState == U1ON)
 	{
-		if (u1_WifiScanDone_F == U1OFF) {
+		if (st_WifiStatus.u1_WifiScanDone_F == U1FALSE) {
 			lv_obj_clear_flag(ui_Spinner1, LV_OBJ_FLAG_HIDDEN);
-		} else {
+		} else if (st_WifiStatus.u1_WifiScanDone_F == U1TRUE) {
 			lv_obj_add_flag(ui_Spinner1, LV_OBJ_FLAG_HIDDEN);
 			if (timer) {
 				lv_timer_del(timer);
@@ -74,9 +74,9 @@ void Event_ScanSwitch(lv_event_t * e)
 {
 	lv_obj_t * sw = lv_event_get_target(e);
 	if(lv_obj_has_state(sw, LV_STATE_CHECKED)) {
-		u1_WifiScanState = WIFI_SCAN_ON;
+		st_WifiStatus.u1_WifiScanState = WIFI_SCAN_ON;
 	} else {
-		u1_WifiScanState = WIFI_SCAN_OFF;
+		st_WifiStatus.u1_WifiScanState = WIFI_SCAN_OFF;
 	}
 	timer = lv_timer_create(Check_ScanState_Callback, 100, NULL);
 }
@@ -88,13 +88,13 @@ void Event_ScanSwitch(lv_event_t * e)
  * It removes spinner and label children from the message box, then displays a success or error message.
  * The timer is deleted after the status is handled.
  *
- * @param timer1 Pointer to the lv_timer_t structure.
+ * @param a_timer Pointer to the lv_timer_t structure.
  */
-static void wifi_connect_status_cb(lv_timer_t * timer1)
+void wifi_connect_status_cb(lv_timer_t * a_timer)
 {
-	lv_obj_t * mbox = (lv_obj_t *)lv_timer_get_user_data(timer1);
+	lv_obj_t * mbox = (lv_obj_t *)lv_timer_get_user_data(a_timer);
 
-	if ((u1_WifiConnected_F == U1TRUE) || (u1_WifiConnected_Fail_F == U1TRUE))
+	if ((st_WifiStatus.u1_WifiConnected_F == U1TRUE) || (st_WifiStatus.u1_WifiConnected_Fail_F == U1TRUE))
 	{
 		uint32_t child_cnt = lv_obj_get_child_cnt(mbox);
 		for (uint32_t i = 0; i < child_cnt; ) {
@@ -120,14 +120,14 @@ static void wifi_connect_status_cb(lv_timer_t * timer1)
 			}
 		}
 
-		if (u1_WifiConnected_F == U1TRUE) {
+		if (st_WifiStatus.u1_WifiConnected_F == U1TRUE) {
 			lv_msgbox_add_title(mbox, "Success");
 			lv_msgbox_add_text(mbox, "\nConnect Successfully!");
-		} else if (u1_WifiConnected_Fail_F == U1TRUE) {
+		} else if (st_WifiStatus.u1_WifiConnected_Fail_F == U1TRUE) {
 			lv_msgbox_add_title(mbox, "Error");
 			lv_msgbox_add_text(mbox, "\nWrong Password!");
 		}
-		lv_timer_del(timer1);
+		lv_timer_del(a_timer);
 	}
 }
 
