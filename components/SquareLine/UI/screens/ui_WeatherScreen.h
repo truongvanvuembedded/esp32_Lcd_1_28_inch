@@ -21,6 +21,7 @@ extern lv_obj_t * ui_HourLable;
 extern lv_obj_t * ui_Divider;
 extern lv_obj_t * ui_MinuteLable;
 extern lv_obj_t * ui_SecondLable;
+extern lv_obj_t * ui_Divider1;
 extern lv_obj_t * ui_DateGroup1;
 extern lv_obj_t * ui_DayOfWeekLable;
 extern lv_obj_t * ui_DayLale;

@@ -23,6 +23,7 @@ lv_obj_t * ui_HourLable = NULL;
 lv_obj_t * ui_Divider = NULL;
 lv_obj_t * ui_MinuteLable = NULL;
 lv_obj_t * ui_SecondLable = NULL;
+lv_obj_t * ui_Divider1 = NULL;
 lv_obj_t * ui_DateGroup1 = NULL;
 lv_obj_t * ui_DayOfWeekLable = NULL;
 lv_obj_t * ui_DayLale = NULL;
@@ -40,8 +41,18 @@ lv_obj_t * ui_HumidityContainer = NULL;
 lv_obj_t * ui_HumidityDataLable = NULL;
 lv_obj_t * ui_Label3 = NULL;
 
-static char weekday_buf[16];
-static char weekday_prev[16];
+static char weekday_buf[4];
+static char weekday_prev[4];
+static char month_buf[4];
+static char month_prev[4];
+static char lat_buf[9];
+static char lat_prev[9];
+static char lon_buf[9];
+static char lon_prev[9];
+static char temp_buf[5];
+static char temp_prev[5];
+static char humi_buf[5];
+static char humi_prev[5];
 
 // event funtions
 void ui_event_WeatherScreen(lv_event_t * e)
@@ -59,16 +70,15 @@ void ui_event_WeatherScreen(lv_event_t * e)
 void ui_WeatherScreen_screen_init(void)
 {
     lv_subject_init_int(&subj_day, 0);
-    lv_subject_init_int(&subj_month, 0);
-    lv_subject_init_string(&subj_weekday, weekday_buf, weekday_prev, sizeof(weekday_buf), "");
+    lv_subject_init_string(&subj_month, month_buf, month_prev, sizeof(month_buf), "---");
+    lv_subject_init_string(&subj_weekday, weekday_buf, weekday_prev, sizeof(weekday_buf), "---");
     lv_subject_init_int(&subj_hour, 0);
     lv_subject_init_int(&subj_minute, 0);
     lv_subject_init_int(&subj_Second, 0);
-    lv_subject_init_int(&subj_lat, 0);
-    lv_subject_init_int(&subj_lon, 0);
-    lv_subject_init_int(&subj_temperature, 0);
-    lv_subject_init_int(&subj_humidity, 0);
-
+    lv_subject_init_string(&subj_lat, lat_buf, lat_prev, sizeof(lat_buf), "---");
+    lv_subject_init_string(&subj_lon, lon_buf, lon_prev, sizeof(lon_buf), "---");
+    lv_subject_init_string(&subj_temperature, temp_buf, temp_prev, sizeof(temp_buf), "---");
+    lv_subject_init_string(&subj_humidity, humi_buf, humi_prev, sizeof(humi_buf), "---");
     ui_WeatherScreen = lv_obj_create(NULL);
     lv_obj_remove_flag(ui_WeatherScreen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
@@ -77,21 +87,19 @@ void ui_WeatherScreen_screen_init(void)
     lv_obj_set_width(ui_DateTimeContainer, lv_pct(100));
     lv_obj_set_height(ui_DateTimeContainer, lv_pct(50));
     lv_obj_set_align(ui_DateTimeContainer, LV_ALIGN_TOP_MID);
-    lv_obj_set_flex_flow(ui_DateTimeContainer, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(ui_DateTimeContainer, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_remove_flag(ui_DateTimeContainer, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_border_width(ui_DateTimeContainer, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui_DateTimeContainer, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_TimeGroup = lv_obj_create(ui_DateTimeContainer);
     lv_obj_remove_style_all(ui_TimeGroup);
-    lv_obj_set_width(ui_TimeGroup, lv_pct(50));
+    lv_obj_set_width(ui_TimeGroup, lv_pct(100));
     lv_obj_set_height(ui_TimeGroup, lv_pct(35));
-    lv_obj_set_x(ui_TimeGroup, -1);
-    lv_obj_set_y(ui_TimeGroup, -12);
+    lv_obj_set_x(ui_TimeGroup, 5);
+    lv_obj_set_y(ui_TimeGroup, -3);
     lv_obj_set_align(ui_TimeGroup, LV_ALIGN_CENTER);
     lv_obj_set_flex_flow(ui_TimeGroup, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(ui_TimeGroup, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_set_flex_align(ui_TimeGroup, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_remove_flag(ui_TimeGroup, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_HourLable = lv_label_create(ui_TimeGroup);
@@ -99,39 +107,39 @@ void ui_WeatherScreen_screen_init(void)
     lv_obj_set_height(ui_HourLable, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_HourLable, LV_ALIGN_CENTER);
     //lv_label_set_text(ui_HourLable, "16");
-    lv_label_bind_text(ui_HourLable, &subj_hour, NULL);
-    lv_obj_set_style_text_font(ui_HourLable, &lv_font_montserrat_40, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_bind_text(ui_HourLable, &subj_hour, "%02d");
+    lv_obj_set_style_text_font(ui_HourLable, &lv_font_montserrat_36, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Divider = lv_label_create(ui_TimeGroup);
     lv_obj_set_width(ui_Divider, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Divider, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Divider, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Divider, ":");
-    lv_obj_set_style_text_font(ui_Divider, &lv_font_montserrat_40, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Divider, &lv_font_montserrat_36, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_MinuteLable = lv_label_create(ui_TimeGroup);
     lv_obj_set_width(ui_MinuteLable, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_MinuteLable, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_MinuteLable, LV_ALIGN_CENTER);
     //lv_label_set_text(ui_MinuteLable, "25");
-    lv_label_bind_text(ui_MinuteLable, &subj_minute, NULL);
-    lv_obj_set_style_text_font(ui_MinuteLable, &lv_font_montserrat_40, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_bind_text(ui_MinuteLable, &subj_minute, "%02d");
+    lv_obj_set_style_text_font(ui_MinuteLable, &lv_font_montserrat_36, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 
-    ui_Divider = lv_label_create(ui_TimeGroup);
-    lv_obj_set_width(ui_Divider, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Divider, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_Divider, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Divider, ":");
-    lv_obj_set_style_text_font(ui_Divider, &lv_font_montserrat_40, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_Divider1 = lv_label_create(ui_TimeGroup);
+    lv_obj_set_width(ui_Divider1, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Divider1, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Divider1, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Divider1, ":");
+    lv_obj_set_style_text_font(ui_Divider1, &lv_font_montserrat_36, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_SecondLable = lv_label_create(ui_TimeGroup);
     lv_obj_set_width(ui_SecondLable, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SecondLable, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_SecondLable, LV_ALIGN_CENTER);
     //lv_label_set_text(ui_SecondLable, "25");
-    lv_label_bind_text(ui_SecondLable, &subj_Second, NULL);
-    lv_obj_set_style_text_font(ui_SecondLable, &lv_font_montserrat_40, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_bind_text(ui_SecondLable, &subj_Second, "%02d");
+    lv_obj_set_style_text_font(ui_SecondLable, &lv_font_montserrat_36, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 
 
@@ -139,9 +147,9 @@ void ui_WeatherScreen_screen_init(void)
     lv_obj_remove_style_all(ui_DateGroup1);
     lv_obj_set_width(ui_DateGroup1, lv_pct(40));
     lv_obj_set_height(ui_DateGroup1, lv_pct(20));
-    lv_obj_set_x(ui_DateGroup1, -1);
-    lv_obj_set_y(ui_DateGroup1, -12);
-    lv_obj_set_align(ui_DateGroup1, LV_ALIGN_CENTER);
+    lv_obj_set_x(ui_DateGroup1, 2);
+    lv_obj_set_y(ui_DateGroup1, -9);
+    lv_obj_set_align(ui_DateGroup1, LV_ALIGN_BOTTOM_MID);
     lv_obj_set_flex_flow(ui_DateGroup1, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(ui_DateGroup1, LV_FLEX_ALIGN_SPACE_AROUND, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_remove_flag(ui_DateGroup1, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -159,7 +167,7 @@ void ui_WeatherScreen_screen_init(void)
     lv_obj_set_height(ui_DayLale, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_DayLale, LV_ALIGN_CENTER);
     //lv_label_set_text(ui_DayLale, "15");
-    lv_label_bind_text(ui_DayLale, &subj_day, "%d");
+    lv_label_bind_text(ui_DayLale, &subj_day, "%02d");
     lv_obj_set_style_text_font(ui_DayLale, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_MonthLable = lv_label_create(ui_DateGroup1);
@@ -167,7 +175,7 @@ void ui_WeatherScreen_screen_init(void)
     lv_obj_set_height(ui_MonthLable, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_MonthLable, LV_ALIGN_CENTER);
     //lv_label_set_text(ui_MonthLable, "Jun");
-    lv_label_bind_text(ui_MonthLable, &subj_month, "%02d");
+    lv_label_bind_text(ui_MonthLable, &subj_month, NULL);
     lv_obj_set_style_text_font(ui_MonthLable, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_LocationGroup1 = lv_obj_create(ui_WeatherScreen);
@@ -189,6 +197,7 @@ void ui_WeatherScreen_screen_init(void)
     lv_obj_set_height(ui_CityNameLable, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_CityNameLable, LV_ALIGN_CENTER);
     lv_label_set_text(ui_CityNameLable, "Da Nang");
+    lv_obj_set_style_text_font(ui_CityNameLable, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_LocationDataContainer = lv_obj_create(ui_LocationGroup1);
     lv_obj_remove_style_all(ui_LocationDataContainer);
@@ -205,15 +214,15 @@ void ui_WeatherScreen_screen_init(void)
     lv_obj_set_align(ui_LatDataLable, LV_ALIGN_CENTER);
     //lv_label_set_text(ui_LatDataLable, "21.0285");
     lv_label_bind_text(ui_LatDataLable, &subj_lat, NULL);
-    lv_obj_set_style_text_font(ui_LatDataLable, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_LatDataLable, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_LonDataLable = lv_label_create(ui_LocationDataContainer);
     lv_obj_set_width(ui_LonDataLable, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_LonDataLable, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_LonDataLable, LV_ALIGN_CENTER);
     //lv_label_set_text(ui_LonDataLable, "105.8542");
-    lv_label_bind_text(ui_LatDataLable, &subj_lon, NULL);
-    lv_obj_set_style_text_font(ui_LonDataLable, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_bind_text(ui_LonDataLable, &subj_lon, NULL);
+    lv_obj_set_style_text_font(ui_LonDataLable, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_WeatherGoup = lv_obj_create(ui_WeatherScreen);
     lv_obj_remove_style_all(ui_WeatherGoup);
@@ -287,7 +296,6 @@ void ui_WeatherScreen_screen_init(void)
     uic_WeatherGoup = ui_WeatherGoup;
     uic_TempLable = ui_TempLable;
     uic_HumidityContainer = ui_HumidityContainer;
-
 }
 
 void ui_WeatherScreen_screen_destroy(void)

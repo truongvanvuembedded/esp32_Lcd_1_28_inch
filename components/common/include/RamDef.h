@@ -58,7 +58,10 @@ EXTERN U1 u1_BufferRespone[MAX_HTTP_OUTPUT_BUFFER + 1];
 EXTERN U1 u1_HttpRequest;
 
 EXTERN ST_WEATHER_DATA st_WeatherData;
+EXTERN ST_WEATHER_DATA st_WeatherData_Before;
 EXTERN ST_DATETIME_DATA st_DateTimeData;
 EXTERN ST_DATETIME_DATA st_DateTimeData_Before;
+EXTERN ST_LOCATION_DATA st_LocationData;
+EXTERN ST_LOCATION_DATA st_LocationData_Before;
 
 /* ************************************* End of File ******************************************** */

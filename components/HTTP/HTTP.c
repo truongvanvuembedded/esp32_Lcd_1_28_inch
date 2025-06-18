@@ -36,10 +36,11 @@
 //==================================================================================================
 //	Local define
 //==================================================================================================
-#define MAX_HTTP_RECV_BUFFER 512
-#define MAX_HTTP_OUTPUT_BUFFER 2048
+#define MAX_HTTP_RECV_BUFFER 	512
+#define MAX_HTTP_OUTPUT_BUFFER 	2048
 #define OPEN_WEATHER_API_KEY	"b84c92063426d24ade911c7c7a771248"
-
+#define LAT_LOCATION_DATA		21.0285
+#define LON_LOCATION_DATA		105.8542
 //==================================================================================================
 //	Local define I/O
 //==================================================================================================
@@ -52,9 +53,6 @@
 //	Local RAM
 //==================================================================================================
 static esp_http_client_handle_t client;
-static time_t now;
-static struct tm timeinfo;
-
 //==================================================================================================
 //	Local ROM
 //==================================================================================================
@@ -85,8 +83,6 @@ static void get_and_log_Time(void);
 void http_init(void)
 {
 	u1_HttpRequest = U1ON;
-	st_WeatherData.Lat = 0;
-	st_WeatherData.Lon = 0;
 	st_WeatherData.Temperature = 0;
 	st_WeatherData.Humidity = 0;
 	st_WeatherData.u1_GetWeatherDataSuccess_F = U1FALSE;
@@ -99,12 +95,20 @@ void http_init(void)
 	st_DateTimeData.u1_Month = 0;
 	st_DateTimeData.u1_SynTimeDataSuccess_F = U1FALSE;
 
+	st_LocationData.lat = (double) LAT_LOCATION_DATA;
+	st_LocationData.lon = (double) LON_LOCATION_DATA;
+
+	// Build query string dynamically using defined macros
+	char query_string[128];
+	snprintf(query_string, sizeof(query_string),
+		"lat=%.5f&lon=%.5f&appid=%s",
+		LAT_LOCATION_DATA, LON_LOCATION_DATA, OPEN_WEATHER_API_KEY);
 	memset(u1_BufferRespone, 0, sizeof(u1_BufferRespone));
 	// Init http client and server end point to get weather data
 	esp_http_client_config_t config = {
 		.host = "api.openweathermap.org",
 		.path = "/data/2.5/weather",
-		.query = "lat=21.0285&lon=105.8542&appid=b84c92063426d24ade911c7c7a771248",
+		.query = query_string,
 		.event_handler = _http_event_handler,
 		.user_data = u1_BufferRespone,
 		.disable_auto_redirect = true,

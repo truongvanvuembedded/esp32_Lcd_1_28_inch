@@ -53,8 +53,6 @@ typedef struct
 
 // Struct to hold weather data
 typedef struct {
-	double Lat;
-	double Lon;
 	double Temperature;
 	double Humidity;
 	U1 u1_GetWeatherDataSuccess_F;
@@ -71,5 +69,11 @@ typedef struct {
 	U1 u1_SynTimeDataSuccess_F;
 } ST_DATETIME_DATA;
 
+// Struct to location and cityname
+typedef struct {
+	double lat;
+	double lon;
+	U1 u1_CityName;
+} ST_LOCATION_DATA;
 #endif	// DATA_DEF_H
 /* ************************************* End of File ******************************************** */

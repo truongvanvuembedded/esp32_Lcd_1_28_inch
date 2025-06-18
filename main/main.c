@@ -65,7 +65,15 @@ static struct tm timeinfo;
 //==================================================================================================
 //	Local ROM
 //==================================================================================================
-//static const char *TAG = "main.c";
+static const char *TAG = "main.c";
+const char *month_names_short[12] = {
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+
+const char *weekday_names_short[7] = {
+	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+};
 //==================================================================================================
 //	Local Function Prototype
 //==================================================================================================
@@ -93,6 +101,7 @@ static void update_TimeData(struct tm timeinfo)
 	st_DateTimeData.u1_DayOfWeek = timeinfo.tm_wday;
 	st_DateTimeData.u1_Day = timeinfo.tm_mday;
 	st_DateTimeData.u1_Month = timeinfo.tm_mon + 1; // tm_mon is 0-based
+	st_DateTimeData.u1_Second = timeinfo.tm_sec;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,8 +123,19 @@ void Rtc_Task(void* pvparameter)
 	{
 		if (st_WeatherData.u1_GetWeatherDataSuccess_F == U1TRUE)
 		{
-			st_WeatherData.u1_GetWeatherDataSuccess_F = U1FALSE;
-
+			if (st_WeatherData.Temperature != st_WeatherData_Before.Temperature) {
+				char Temperature_str[5];
+				snprintf(Temperature_str, sizeof(Temperature_str), "%.1f", st_WeatherData.Temperature); 
+				lv_subject_copy_string(&subj_temperature, Temperature_str);
+				ESP_LOGI(TAG,"Temp: %f", st_WeatherData.Temperature);
+			}
+			if (st_WeatherData.Humidity != st_WeatherData_Before.Humidity) {
+				char Humidity_str[5];
+				snprintf(Humidity_str, sizeof(Humidity_str), "%.1f", st_WeatherData.Humidity); 
+				lv_subject_copy_string(&subj_humidity, Humidity_str)
+				ESP_LOGI(TAG,"Humi: %f", st_WeatherData.Humidity);;
+			}
+			st_WeatherData_Before = st_WeatherData;
 		}
 		if (st_DateTimeData.u1_SynTimeDataSuccess_F == U1TRUE)
 		{
@@ -139,17 +159,29 @@ void Rtc_Task(void* pvparameter)
 				lv_subject_set_int(&subj_day, st_DateTimeData.u1_Day);
 			}
 			if (st_DateTimeData.u1_Month != st_DateTimeData_Before.u1_Month) {
-				lv_subject_set_int(&subj_month, st_DateTimeData.u1_Month);
+				const char *month_str = month_names_short[st_DateTimeData.u1_Month - 1]; // tr? 1 v? m?ng b?t ??u t? 0
+				lv_subject_copy_string(&subj_month, month_str);
 			}
 			if (st_DateTimeData.u1_DayOfWeek != st_DateTimeData_Before.u1_DayOfWeek) {
-				lv_subject_set_int(&subj_weekday, st_DateTimeData.u1_DayOfWeek);
+				const char *weekday_str = weekday_names_short[st_DateTimeData.u1_DayOfWeek];
+				lv_subject_copy_string(&subj_weekday, weekday_str);
 			}
 			st_DateTimeData_Before = st_DateTimeData;
-
-			char buffer[64];
-			strftime(buffer, sizeof(buffer), "%H:%M:%S %d/%m/%Y", &timeinfo);
-			ESP_LOGI("RTC", "Local Time: %s", buffer);
 		}
+
+		if (st_LocationData.lat != st_LocationData_Before.lat)
+		{
+			char lat_str[8];
+			snprintf(lat_str, sizeof(lat_str), "%.5f", st_LocationData.lat); 
+			lv_subject_copy_string(&subj_lat, lat_str);
+		}
+		if (st_LocationData.lon != st_LocationData_Before.lon)
+		{
+			char lon_str[8];
+			snprintf(lon_str, sizeof(lon_str), "%.5f", st_LocationData.lon); 
+			lv_subject_copy_string(&subj_lon, lon_str);
+		}
+		st_LocationData = st_LocationData_Before;
 
 		vTaskDelay(pdMS_TO_TICKS(1000));
 	}
@@ -193,5 +225,4 @@ void app_main(void)
 	xTaskCreatePinnedToCore(UI_task, 	"UI_task",		8192, NULL, 7, NULL, 0);
 	xTaskCreatePinnedToCore(Http_Task, 	"Http_Task",	8192, NULL, 6, NULL, 0);
 	xTaskCreatePinnedToCore(Rtc_Task, 	"Rtc_Task",		4096, NULL, 5, NULL, 0);
-
 }
