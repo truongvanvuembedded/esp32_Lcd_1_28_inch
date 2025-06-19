@@ -36,6 +36,14 @@ ESP32_LCD_1_28_Inch/
 
 ---
 
+## 📥 Clone Repository & Setup Environment
+- git clone --recurse-submodules https://github.com/truongvanvuembedded/esp32_Lcd_1_28_inch.git
+
+## 📌 Version Requirements
+- LVGL: v9.3 (already included as a submodule)
+- ESP-IDF: v5.3.1
+
+
 🚀 Build & Flash Instructions
 
 👨‍💻 Author
