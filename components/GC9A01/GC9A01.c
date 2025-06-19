@@ -34,6 +34,7 @@
 #include "sdkconfig.h"
 #include "GC9A01.h"
 #include "Define.h"
+#include "RamDef.h"
 //==================================================================================================
 //	Local define
 //==================================================================================================
@@ -145,13 +146,15 @@ spi_host_device_t LCD_HOST=SPI2_HOST;
 #if(CONFIG_GC9A01_CONTROL_BACK_LIGHT_MODE)
 ledc_channel_config_t  ledc_cConfig;
 ledc_timer_config_t	ledc_tConfig;
-void LEDC_PWM_Duty_Set(U1 DutyP);
+static void LEDC_PWM_Duty_Set(U1 DutyP);
+static void LEDC_Channel_Config(void);
+static void LEDC_Timer_Config(void);
 #endif
 #endif
 //==================================================================================================
 //	Local ROM
 //==================================================================================================
-static const char *TAG = "GC9A01";
+//static const char *TAG = "GC9A01";
 // Command sequence to init LCD
 static const lcd_init_cmd_t lcd_init_cmds[]={
 	{0xef,{0},0},
@@ -217,7 +220,6 @@ static void RowSet(U2 RowStart, U2 RowEnd) ;
 static void ColorModeSet(U1 ColorMode) ;
 static void MemAccessModeSet(U1 Rotation, U1 VertMirror,
 		U1 HorizMirror, U1 IsBGR);
-static void GC9A01_SetBL(U1 Value);
 static U2 GC9A01_GetPixel(int16_t x, int16_t y);
 static void SwapBytes(U2 *color);
 static void GC9A01_HardReset(void);
@@ -242,7 +244,7 @@ static U1 u1_cst816d_i2c_read_continous(U1 u1_RegAdd, U1 *apu1_Data, U2 au2_Len)
 void GC9A01_Init()
 {
 	int cmd=0;
-
+	u1_BrightNessValue = 100;
 	u1_GC9A01_X_Start = 0;
 	u1_GC9A01_Y_Start = 0;
 
@@ -296,7 +298,7 @@ void GC9A01_Init()
 	#endif
 
 	#if(CONFIG_GC9A01_CONTROL_BACK_LIGHT_USED)
-	GC9A01_SetBL(100);
+	GC9A01_SetBL(u1_BrightNessValue);
 	#endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -329,9 +331,9 @@ static void gc9a01_GPIO_init(void)
 	gpio_config(&gpiocfg);
 	gpio_set_level(GC9A01_PIN_NUM_RST,1);
 	#endif
-	gpiocfg.pin_bit_mask|=((uint64_t)1UL<<3);
-	gpio_config(&gpiocfg);
-	gpio_set_level(3,1);
+	//gpiocfg.pin_bit_mask|=((uint64_t)1UL<<GC9A01_PIN_NUM_LED_CTRL);
+	//gpio_config(&gpiocfg);
+	//gpio_set_level(3,1);
 
 
 
@@ -763,7 +765,7 @@ static void MemAccessModeSet(U1 Rotation, U1 VertMirror, U1 HorizMirror, U1 IsBG
 //	Remarks	:	Config-dependent implementation
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-static void GC9A01_SetBL(U1 Value)
+void GC9A01_SetBL(U1 Value)
 {
 	if (Value > 100) Value = 100;		// Cap to 100%
 
@@ -1007,7 +1009,7 @@ void GC9A01_Clear(void)
 //	Remarks	:	Config-dependent
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void LEDC_PWM_Duty_Set(U1 DutyP)
+static void LEDC_PWM_Duty_Set(U1 DutyP)
 {
 	U2 Duty,MaxD;
 
@@ -1033,9 +1035,9 @@ void LEDC_PWM_Duty_Set(U1 DutyP)
 //	Remarks	:	Backlight control
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void LEDC_Channel_Config(void)
+static void LEDC_Channel_Config(void)
 {
-	ledc_cConfig.gpio_num=GC9A01_PIN_NUM_SCK;
+	ledc_cConfig.gpio_num=GC9A01_PIN_NUM_LED_CTRL;
 	ledc_cConfig.speed_mode=LEDC_LOW_SPEED_MODE;
 	ledc_cConfig.channel=LEDC_CHANNEL_0;
 	ledc_cConfig.intr_type=LEDC_INTR_DISABLE;
@@ -1056,7 +1058,7 @@ void LEDC_Channel_Config(void)
 //	Remarks	:	Backlight control
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void LEDC_Timer_Config(void)
+static void LEDC_Timer_Config(void)
 {
 	ledc_tConfig.speed_mode=LEDC_LOW_SPEED_MODE ;
 	ledc_tConfig.duty_resolution=LEDC_TIMER_8_BIT;

@@ -5,6 +5,8 @@
 
 #include "../ui.h"
 
+lv_obj_t * uic_NewFeature;
+lv_obj_t * uic_BrightnessButton;
 lv_obj_t * uic_DisplayButton;
 lv_obj_t * uic_Settingbutton;
 lv_obj_t * uic_ButtonMenuContainer;
@@ -12,6 +14,9 @@ lv_obj_t * ui_MenuScreen = NULL;
 lv_obj_t * ui_ButtonMenuContainer = NULL;
 lv_obj_t * ui_Settingbutton = NULL;
 lv_obj_t * ui_DisplayButton = NULL;
+lv_obj_t * ui_ButtonMenuContainer1 = NULL;
+lv_obj_t * ui_BrightnessButton = NULL;
+lv_obj_t * ui_NewFeature = NULL;
 // event funtions
 void ui_event_Settingbutton(lv_event_t * e)
 {
@@ -30,7 +35,14 @@ void ui_event_DisplayButton(lv_event_t * e)
         _ui_screen_change(&ui_WeatherScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_WeatherScreen_screen_init);
     }
 }
+void ui_event_BrightnessButton(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
 
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_screen_change(&ui_BrightNessAjustScreen, LV_SCR_LOAD_ANIM_FADE_ON, 100, 0, &ui_BrightNessAjustScreen_screen_init);
+    }
+}
 // build funtions
 
 void ui_MenuScreen_screen_init(void)
@@ -78,11 +90,45 @@ void ui_MenuScreen_screen_init(void)
     lv_label_set_text(label1, LV_SYMBOL_HOME);
     lv_obj_center(label1);
 
+    
+    ui_ButtonMenuContainer1 = lv_obj_create(ui_MenuScreen);
+    lv_obj_remove_style_all(ui_ButtonMenuContainer1);
+    lv_obj_set_width(ui_ButtonMenuContainer1, lv_pct(100));
+    lv_obj_set_height(ui_ButtonMenuContainer1, lv_pct(30));
+    lv_obj_set_align(ui_ButtonMenuContainer1, LV_ALIGN_CENTER);
+    lv_obj_set_flex_flow(ui_ButtonMenuContainer1, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(ui_ButtonMenuContainer1, LV_FLEX_ALIGN_SPACE_AROUND, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_remove_flag(ui_ButtonMenuContainer1, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_BrightnessButton = lv_button_create(ui_ButtonMenuContainer1);
+    lv_obj_set_width(ui_BrightnessButton, lv_pct(30));
+    lv_obj_set_height(ui_BrightnessButton, lv_pct(100));
+    lv_obj_set_align(ui_BrightnessButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_BrightnessButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_remove_flag(ui_BrightnessButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_BrightnessButton, lv_color_hex(0xC4C4C4), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_BrightnessButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t*  BrightnessLable= lv_label_create(ui_BrightnessButton);
+    lv_label_set_text(BrightnessLable, LV_SYMBOL_EDIT );
+    lv_obj_center(BrightnessLable);
+
+    ui_NewFeature = lv_button_create(ui_ButtonMenuContainer1);
+    lv_obj_set_width(ui_NewFeature, lv_pct(30));
+    lv_obj_set_height(ui_NewFeature, lv_pct(100));
+    lv_obj_set_align(ui_NewFeature, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_NewFeature, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_remove_flag(ui_NewFeature, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_NewFeature, lv_color_hex(0xC4C4C4), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_NewFeature, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     lv_obj_add_event_cb(ui_Settingbutton, ui_event_Settingbutton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_DisplayButton, ui_event_DisplayButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_BrightnessButton, ui_event_BrightnessButton, LV_EVENT_ALL, NULL);
     uic_ButtonMenuContainer = ui_ButtonMenuContainer;
     uic_Settingbutton = ui_Settingbutton;
     uic_DisplayButton = ui_DisplayButton;
+    uic_BrightnessButton = ui_BrightnessButton;
+    uic_NewFeature = ui_NewFeature;
 
 }
 
@@ -98,5 +144,10 @@ void ui_MenuScreen_screen_destroy(void)
     ui_Settingbutton = NULL;
     uic_DisplayButton = NULL;
     ui_DisplayButton = NULL;
+    ui_ButtonMenuContainer1 = NULL;
+    uic_BrightnessButton = NULL;
+    ui_BrightnessButton = NULL;
+    uic_NewFeature = NULL;
+    ui_NewFeature = NULL;
 
 }

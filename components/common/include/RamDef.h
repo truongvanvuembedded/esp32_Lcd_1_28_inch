@@ -60,5 +60,7 @@ EXTERN ST_DATETIME_DATA st_DateTimeData;
 EXTERN ST_DATETIME_DATA st_DateTimeData_Before;
 EXTERN ST_LOCATION_DATA st_LocationData;
 EXTERN ST_LOCATION_DATA st_LocationData_Before;
+// GC9A01.c
+EXTERN U1 u1_BrightNessValue;
 
 /* ************************************* End of File ******************************************** */

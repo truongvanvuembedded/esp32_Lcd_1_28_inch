@@ -36,6 +36,7 @@ void ui_init(void)
     ui_WifiScreen_screen_init();
     ui_WifiTyping_screen_init();
     ui_WeatherScreen_screen_init();
+    ui_BrightNessAjustScreen_screen_init();
     
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_MenuScreen);

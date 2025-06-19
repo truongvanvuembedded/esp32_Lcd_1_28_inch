@@ -66,7 +66,7 @@ static U1 u1_TimerCnt;
 //==================================================================================================
 //	Local ROM
 //==================================================================================================
-static const char *TAG = "main.c";
+//static const char *TAG = "main.c";
 const char *month_names_short[12] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"

@@ -23,6 +23,8 @@ extern lv_obj_t * ui_DisplayButton;
 extern lv_obj_t * uic_ButtonMenuContainer;
 extern lv_obj_t * uic_Settingbutton;
 extern lv_obj_t * uic_DisplayButton;
+extern lv_obj_t * uic_BrightnessButton;
+extern lv_obj_t * uic_NewFeature;
 
 #ifdef __cplusplus
 } /*extern "C"*/

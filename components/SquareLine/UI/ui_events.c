@@ -174,3 +174,14 @@ void Event_ConfirmPasswordButton(lv_event_t * e)
 		lv_msgbox_add_close_button(mbox1);
 	}
 }
+
+
+void event_BrightnessAdjust_Callback(lv_event_t * e)
+{
+	lv_obj_t* target;
+	U4 u4_value;
+	target = lv_event_get_target(e);
+	u4_value = (U4)lv_slider_get_value(target);
+	if (u4_value > (U4)100)	u4_value = (U4)100;
+	GC9A01_SetBL((U1)u4_value);
+}

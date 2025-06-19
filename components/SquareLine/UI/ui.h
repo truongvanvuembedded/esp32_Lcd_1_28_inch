@@ -18,12 +18,14 @@ extern "C" {
 #include "ui_events.h"
 #include "Define.h"
 #include "RamDef.h"
+#include "GC9A01.h"
 ///////////////////// SCREENS ////////////////////
 
 #include "screens/ui_MenuScreen.h"
 #include "screens/ui_WifiScreen.h"
 #include "screens/ui_WifiTyping.h"
 #include "screens/ui_WeatherScreen.h"
+#include "screens/ui_BrightNessAjustScreen.h"
 
 ///////////////////// VARIABLES ////////////////////
 

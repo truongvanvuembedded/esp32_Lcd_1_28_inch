@@ -10,9 +10,10 @@ idf_component_register(
         "UI/screens/ui_WifiTyping.c"
         "UI/screens/ui_WifiScreen.c"
         "UI/screens/ui_WeatherScreen.c"
+        "UI/screens/ui_BrightNessAjustScreen.c"
     INCLUDE_DIRS 
         "UI"
         "UI/components"
         "UI/fonts"
         "UI/screens"
-    REQUIRES lvgl common Wifi_Scan)
+    REQUIRES lvgl common Wifi_Scan GC9A01)

@@ -34,12 +34,15 @@
 #define GC9A01_PIN_NUM_SCK			((U1)6)
 #define GC9A01_PIN_NUM_CS			((U1)10)
 #define GC9A01_PIN_NUM_DC			((U1)2)
-#define GC9A01_PIN_NUM_RST			((U1)3)
+#define GC9A01_PIN_NUM_LED_CTRL		((U1)3)
 
 #define GC9A01_SPI_SCK_FREQ_M		SPI_MASTER_FREQ_80M
 
 #define GC9A01_BUFFER_MODE			(1)
 #define GC9A01_BUFFER_MODE_PSRAM	(0)
+
+#define CONFIG_GC9A01_CONTROL_BACK_LIGHT_USED	(1)
+#define CONFIG_GC9A01_CONTROL_BACK_LIGHT_MODE	(1)
 //==================================================================================================
 //	Local define I/O
 //==================================================================================================
@@ -85,3 +88,5 @@ void GC9A01_Screen_Load(uint16_t x,uint16_t y,uint16_t width ,uint16_t height,ui
 void GC9A01_SetWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1);
 void lcd_data(const uint8_t *data, int len);
 #endif
+
+void GC9A01_SetBL(U1 Value);

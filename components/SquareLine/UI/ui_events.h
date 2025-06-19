@@ -12,6 +12,7 @@ extern "C" {
 
 void Event_ScanSwitch(lv_event_t * e);
 void Event_ConfirmPasswordButton(lv_event_t * e);
+void event_BrightnessAdjust_Callback(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/
