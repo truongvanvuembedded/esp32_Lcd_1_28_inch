@@ -43,11 +43,10 @@ void ui_event_WifiSelected(lv_event_t* e)
     if(event_code == LV_EVENT_CLICKED) {
         lv_obj_t* target = lv_event_get_target(e);
         lv_memset(st_WifiSelected.u1_ssid, 0, sizeof(st_WifiSelected.u1_ssid));
+        lv_memset(st_WifiSelected.u1_password, 0, sizeof(st_WifiSelected.u1_password));
         lv_strcpy((char*) st_WifiSelected.u1_ssid, lv_label_get_text(ui_comp_get_child(target, UI_COMP_WIFIITEMS_LABEL3)));
-        U4 u4_ssidLen = sizeof(st_WifiSelected.u1_ssid);
-        U4 u4_passLen = sizeof(st_WifiSelected.u1_password);
         // Check SSID exist in NVS or Not
-        if (u1_load_wifi_info((char*) st_WifiSelected.u1_ssid, (size_t *) &u4_ssidLen, (char*) st_WifiSelected.u1_password, (size_t *) &u4_passLen))
+        if (u1_load_wifi_info(&st_WifiSelected))
         {
             //ESP_LOGI("NVS", "login %s, ssidLen: %d, password: %s, passLen: %d", 
             //    st_WifiSelected.u1_ssid, u4_ssidLen, st_WifiSelected.u1_password, u4_passLen);
@@ -68,7 +67,7 @@ void ui_event_WifiSelected(lv_event_t* e)
             return;
         }
         
-
+        
         lv_label_set_text(ui_WifiSelectedName, (const char*)st_WifiSelected.u1_ssid);
         //ESP_LOGI("Wifi Select", "%s", st_WifiSelected.u1_ssid);
         _ui_screen_change(&ui_WifiTyping, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_WifiTyping_screen_init);

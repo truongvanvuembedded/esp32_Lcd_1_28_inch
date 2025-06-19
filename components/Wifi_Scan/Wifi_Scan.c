@@ -304,7 +304,7 @@ static void saveWifiInfo(const char *ssid, const char *password)
 		return;
 	}
 
-	// Save SSID and PASSWORD
+	// Save SSID as key and PASSWORD as value
 	nvs_set_str(my_handle, ssid, password);
 	// Wrtie to flash
 	nvs_commit(my_handle);
@@ -330,37 +330,38 @@ static void saveWifiInfo(const char *ssid, const char *password)
 //	Remarks	:	-
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-U1 u1_load_wifi_info(char *ssid, size_t *ssid_len, char *password, size_t *pass_len){
+U1 u1_load_wifi_info(ST_WIFI_SELECTED *apst_WifiSelected)
+{
 	nvs_handle_t my_handle;
+	size_t outlen;
 
 	err = nvs_open(SAVE_WIFI_INFO_NVS_NAMESPACE, NVS_READONLY, &my_handle);
 	if (err != ESP_OK) {
 		ESP_LOGI(TAG, "Failed to open NVS for reading");
 		return U1FALSE;
 	}
-	
-	ESP_LOGI(TAG, "Load WiFi SSID: %s, Password: %s", ssid, password);
-	// Read SSID
-	err = nvs_get_str(my_handle, "ssid", ssid, ssid_len);
+
+	// Read Pass base on SSID (key)
+	err = nvs_get_str(my_handle, (char *)apst_WifiSelected->u1_ssid, NULL, &outlen);
 	if (err != ESP_OK) {
-		ESP_LOGI(TAG, "ssid_len: %d",(int)*ssid_len);
+		ESP_LOGI(TAG, "Failed to get length, err = %s", esp_err_to_name(err));
+		nvs_close(my_handle);
+		return U1FALSE;
+	}
+	if (outlen >= sizeof(apst_WifiSelected->u1_password)) {
+		ESP_LOGI(TAG, "Buffer too small for password");
+		nvs_close(my_handle);
+		return U1FALSE;
+	}
+	err = nvs_get_str(my_handle, (char *) apst_WifiSelected->u1_ssid, (char *) apst_WifiSelected->u1_password, &outlen);
+	apst_WifiSelected->u1_password[outlen] = '\0';
+
+	if (err != ESP_OK) {
 		ESP_LOGI(TAG, "Failed to read SSID, err = %s", esp_err_to_name(err));
-		ssid[0] = '\0';
+		nvs_close(my_handle);
 		return U1FALSE;
 	}
-
-	// Read Password
-	
-	err = nvs_get_str(my_handle, "password", password, pass_len);
-	if (err != ESP_OK) {
-		ESP_LOGI(TAG, "pass_len: %d",(int)*pass_len);
-		ESP_LOGI(TAG, "Failed to read password, err = %s", esp_err_to_name(err));
-		password[0] = '\0';
-		return U1FALSE;
-	}
-
 	nvs_close(my_handle);
-
-	ESP_LOGI(TAG, "Loaded WiFi SSID: %s, Password: %s", ssid, password);
+	ESP_LOGI(TAG, "Loaded WiFi SSID: %s, Password: %s", apst_WifiSelected->u1_ssid, apst_WifiSelected->u1_password);
 	return U1TRUE;
 }
